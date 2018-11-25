@@ -1,6 +1,7 @@
 import numpy as np
 
 arq = open('in.txt', 'r').read()
+arq_s = open('out.txt', 'w')
 
 def criar_matriz(str_matriz):
     matriz = str_matriz.splitlines()
@@ -37,35 +38,39 @@ def coluna_pivo(matriz):
         if elem < menor_elem:
             menor_elem = elem
             i_col_pivo = i
-    print('maior elemento negativo: {0}, coluna pivo: {1}'.format(menor_elem, i_col_pivo+1))
 
     col_pivo = matriz[:,i_col_pivo]
-    return col_pivo 
+    return col_pivo
 
 def elem_pivo(coluna_pivo, const):
     lista_aux = []
 
-    print()
-    print('coluna pivo: {0}, constantes: {1}'.format(coluna_pivo,const))
-    
     for i, coef in enumerate(coluna_pivo):
         if coef >= 0:
             aux = const[i]/coef
             lista_aux.append((aux,i))
     menor_aux = min(lista_aux)
     elem_pivo = coluna_pivo[menor_aux[1]]
-    print('coef depois da divisao: {}'.format(lista_aux))
-    
-    print()
-    print('numero pivo: {0}, linha pivo: {1}'.format(elem_pivo, menor_aux[1]))
+    print('coluna pivo: {0}, constantes: {1}'.format(coluna_pivo, const))
+    arq_s.write('\ncoluna pivo: {0}, constantes: {1}'.format(coluna_pivo, const))
+    print('coef depois da divisao: {0}\n'.format(lista_aux))
+    arq_s.write('\ncoef depois da divisao: {0}\n'.format(lista_aux))
+
+    print('numero pivo: {}'.format(elem_pivo))
+    arq_s.write('\nnumero pivo: {}'.format(elem_pivo))
     return elem_pivo, menor_aux[1]
 
 def escalonar(matriz, num_pivo, linha_pivo, coluna_pivo):
     nova_linha_p = matriz[linha_pivo]/num_pivo
     matriz[linha_pivo] = nova_linha_p
 
+    print('nova linha pivo: {}'.format(matriz[linha_pivo]))
+    arq_s.write('\nnova linha pivo: {}'.format(matriz[linha_pivo]))
+
     matriz_escalonada = []
-    
+
+    print('----------------------- ESCALONANDO -------------------------\n')
+    arq_s.write('\n----------------------- ESCALONANDO -------------------------\n')
     for i,linha in enumerate(matriz):
         if i != linha_pivo:
             nova_linha= linha - (coluna_pivo[i] * nova_linha_p)
@@ -75,6 +80,7 @@ def escalonar(matriz, num_pivo, linha_pivo, coluna_pivo):
 
     matriz_escalonada = np.array(matriz_escalonada)
     print(matriz_escalonada)
+    arq_s.write('\n{}'.format(matriz_escalonada))
     return matriz_escalonada
 
 def solucao_otima(func_obj):
@@ -85,16 +91,20 @@ def solucao_otima(func_obj):
         return True
 
 print(arq)
-print('-----------------------')
+arq_s.write(arq)
+print('-------------------------------------------------------------')
+arq_s.write('\n-------------------------------------------------------------')
 matriz_final = criar_matriz(arq)
 
 mat_padrao = forma_padrao(matriz_final)
 print(mat_padrao)
+arq_s.write('\n{}'.format(mat_padrao))
 
 mat_aux = mat_padrao
 
 while solucao_otima(mat_aux[0]) != True:
     print('função objetivo: {}\n'.format(mat_aux[0]))
+    arq_s.write('\nfunção objetivo: {}\n'.format(mat_aux[0]))
 
     col_pivo = coluna_pivo(mat_aux)
     constantes = mat_aux[:,len(mat_aux[0])- 1]
@@ -103,3 +113,9 @@ while solucao_otima(mat_aux[0]) != True:
 
     mat_aux = escalonar(mat_aux, num_pivo, i_num_pivo, col_pivo)
     func_obj = mat_aux[0]
+
+max_z = mat_aux[0][len(mat_aux[0])-1]
+
+print('\nRESULTADO FINAL -- MAX Z = {}'.format(max_z))
+arq_s.write('\nRESULTADO FINAL -- MAX Z = {}'.format(max_z))
+arq_s.close()
